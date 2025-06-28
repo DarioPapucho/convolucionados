@@ -40,22 +40,22 @@ async def evaluate_dental_condition(
         # Step 1: Classify the dental condition
         classification = await vision_service.classify_image(image, description)
         
-        # Step 2: Generate dental advice using Gemini
-        system_prompt = """You are an expert dentist. Based on the classification of a dental or oral condition, 
-        provide professional, clear, and helpful medical advice. Include recommendations on:
-        - Whether a specialist consultation is necessary
-        - Possible treatments (e.g., root canal, extraction, restoration)
-        - Symptoms or warning signs that require urgent care
-        - Preventive measures and oral hygiene tips
-        
-        Be professional but easy to understand for a non-specialist patient."""
-        
+        system_prompt = """Eres un dentista experto. Según la clasificación de una condición dental u oral, 
+        brinda consejos médicos profesionales, claros y útiles. Incluye recomendaciones sobre:
+        - Si es necesario consultar con un especialista
+        - Posibles tratamientos (como conducto, extracción, restauración)
+        - Síntomas o señales de alerta que requieren atención urgente
+        - Consejos de prevención y cuidado de la higiene bucal
+
+        Habla con un tono amigable y sencillo, para que cualquier persona pueda entenderlo fácilmente. Limita tu respuesta a solo dos párrafos.
+        """
+
         user_prompt = f"""
-        Dental condition classification: {classification}
-        
-        Additional patient description: {description or 'Not provided'}
-        
-        Please provide dental advice based on this information.
+        Clasificación de la condición dental: {classification}
+
+        Descripción adicional del paciente: {description or 'No proporcionada'}
+
+        Por favor, brinda una recomendación dental basada en esta información.
         """
         
         medical_advice = await dialog_service.generate_response(
