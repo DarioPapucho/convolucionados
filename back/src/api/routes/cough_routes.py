@@ -7,7 +7,7 @@ from src.domain.interfaces.dialog_system_service import DialogSystemServiceInter
 from src.infrastructure.services.huggingface_cough_classification import CoughClassificationService
 from src.infrastructure.services.gemini_service import GeminiService
 
-router = APIRouter(prefix="/cough", tags=["cough"])
+router = APIRouter(prefix="/cough", tags=["Cough"])
 
 def get_vision_service() -> CoughClassifierServiceInterface:
     """Dependency injection for the image classification service"""
@@ -39,23 +39,27 @@ async def evaluate_cough(
     try:
         classification = await vision_service.classify_audio(audio, description)
         
-        system_prompt = """You are an expert medical assistant specialized in analyzing cough sounds. Based on the classification of a cough audio sample, 
-        provide professional, clear, and useful medical guidance. Address the following:
-        - Whether the cough is likely associated with COVID-19, general symptoms, or is normal
-        - Whether medical consultation is advised
-        - Possible causes or conditions related to the detected cough type
-        - Recommendations for monitoring symptoms or seeking care
-        - A reminder that this is not a medical diagnosis, but an AI-based assessment to support decision-making
+        system_prompt = """Eres un asistente médico experto en el análisis de sonidos de tos. Tu función es ofrecer orientación médica clara, útil y profesional 
+        basada en la clasificación de una muestra de tos. Solo puedes responder sobre los siguientes tres casos: COVID-19, tos normal o tos con síntomas (sintomática).
+        No debes mencionar ni diagnosticar otras enfermedades o condiciones.
 
-        Respond with clarity and empathy for the patient."""
+        Debes abordar exclusivamente lo siguiente:
+        - Si la tos está posiblemente asociada a COVID-19, si presenta síntomas generales (sintomática), o si se trata de una tos normal
+        - Si es recomendable acudir a una consulta médica
+        - Posibles causas o condiciones relacionadas con uno de los tres tipos de tos permitidos
+        - Recomendaciones para observar la evolución, monitorear síntomas o buscar atención
+        - Un recordatorio claro de que esto no es un diagnóstico médico, sino una evaluación basada en inteligencia artificial para apoyar la toma de decisiones
+
+        Responde con empatía, sencillez y precisión. Nunca inventes o especules fuera de los tres casos definidos."""
 
         user_prompt = f"""
-        Cough classification: {classification}
+        Clasificación de la tos: {classification}
 
-        Additional patient description: {description or 'Not provided'}
+        Descripción adicional del paciente: {description or 'No proporcionada'}
 
-        Please provide medical advice based on this information.
+        Por favor, proporciona una orientación médica basada en esta información.
         """
+
 
         medical_advice = await dialog_service.generate_response(
             system_prompt=system_prompt,

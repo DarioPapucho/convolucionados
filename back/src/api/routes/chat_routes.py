@@ -4,7 +4,7 @@ from src.domain.dtos.chat_response import ChatResponseDTO
 from src.domain.interfaces.dialog_system_service import DialogSystemServiceInterface
 from src.infrastructure.services.gemini_service import GeminiService
 
-router = APIRouter(prefix="/chat", tags=["chat"])
+router = APIRouter(prefix="/chat", tags=["Chat"])
 
 def get_ai_service() -> DialogSystemServiceInterface:
     """Dependency injection for the AI service"""
