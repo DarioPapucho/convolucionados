@@ -13,6 +13,7 @@ from src.api.routes.chat_routes import router as chat_router
 from src.api.routes.lesion_routes import router as lesion_router
 from src.api.routes.cough_routes import router as cough_router
 from src.api.routes.dental_routes import router as dental_router
+from src.api.routes.dermis_routes import router as dermis_router
 
 app = FastAPI(
     title="Convolucionados API",
@@ -34,6 +35,7 @@ app.include_router(chat_router)
 app.include_router(lesion_router)
 app.include_router(cough_router)
 app.include_router(dental_router)
+app.include_router(dermis_router)
 
 @app.get("/")
 async def root():
