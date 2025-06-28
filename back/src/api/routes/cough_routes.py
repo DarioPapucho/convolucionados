@@ -7,7 +7,7 @@ from src.domain.interfaces.dialog_system_service import DialogSystemServiceInter
 from src.infrastructure.services.huggingface_cough_classification import CoughClassificationService
 from src.infrastructure.services.gemini_service import GeminiService
 
-router = APIRouter(prefix="/cough", tags=["cough"])
+router = APIRouter(prefix="/cough", tags=["Cough"])
 
 def get_vision_service() -> CoughClassifierServiceInterface:
     """Dependency injection for the image classification service"""
