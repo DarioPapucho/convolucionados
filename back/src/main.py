@@ -11,6 +11,7 @@ from typing import Optional
 # Import routes
 from src.api.routes.chat_routes import router as chat_router
 from src.api.routes.lesion_routes import router as lesion_router
+from src.api.routes.cough_routes import router as cough_router
 
 app = FastAPI(
     title="Convolucionados API",
@@ -30,6 +31,7 @@ app.add_middleware(
 # Include routes
 app.include_router(chat_router)
 app.include_router(lesion_router)
+app.include_router(cough_router)
 
 @app.get("/")
 async def root():
