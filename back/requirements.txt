@@ -8,4 +8,5 @@ torch
 transformers
 pillow
 librosa
-dependency-injector
+dependency-injectorlibrosa
+pickle
