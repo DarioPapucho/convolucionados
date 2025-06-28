@@ -9,3 +9,5 @@ transformers
 pillow
 librosa
 pickle
+librosa
+dependency-injector
