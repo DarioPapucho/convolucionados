@@ -1,7 +1,7 @@
 class AppConfig {
   static const String serverUrl = String.fromEnvironment(
     'SERVER_URL',
-    defaultValue: 'http://localhost:8000',
+    defaultValue: 'http://192.168.23.222:8000',
   );
   
   static const String dentalEndpoint = '/dental/evaluate';

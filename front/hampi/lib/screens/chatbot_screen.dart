@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/chat_message.dart';
 import '../models/agent.dart';
@@ -26,7 +25,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ImagePicker _picker = ImagePicker();
-  late final AudioRecorder _audioRecorder;
   bool _isLoading = false;
   bool _isRecording = false;
   bool _isFirstMessage = true;
@@ -35,7 +33,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   @override
   void initState() {
     super.initState();
-    _audioRecorder = AudioRecorder();
     _addWelcomeMessage();
   }
 
@@ -68,7 +65,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   void dispose() {
     _textController.dispose();
     _scrollController.dispose();
-    _audioRecorder.dispose();
     super.dispose();
   }
 
@@ -139,34 +135,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   Future<void> _startRecording() async {
-    try {
-      if (await _audioRecorder.hasPermission()) {
-        final directory = await getTemporaryDirectory();
-        final path = '${directory.path}/cough_${DateTime.now().millisecondsSinceEpoch}.wav';
-        await _audioRecorder.start(
-          const RecordConfig(encoder: AudioEncoder.wav),
-          path: path,
-        );
-        setState(() {
-          _isRecording = true;
-        });
-      } else {
-        _showErrorSnackBar('Permiso de micrófono denegado');
-      }
-    } catch (e) {
-      _showErrorSnackBar('Error al iniciar la grabación: $e');
-    }
+
   }
 
   Future<void> _stopRecording() async {
     try {
-      final path = await _audioRecorder.stop();
       setState(() {
         _isRecording = false;
       });
-      if (path != null) {
-        await _processAudio(File(path));
-      }
     } catch (e) {
       setState(() {
         _isRecording = false;
