@@ -210,6 +210,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       timestamp: DateTime.now(),
       diagnosis: isInitial ? diagnosis : null,
       category: isInitial ? MessageCategory.initial : MessageCategory.followup,
+      showClinicsButton: isInitial,
     );
 
     setState(() {

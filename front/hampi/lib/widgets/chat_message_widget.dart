@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'dart:io';
 import '../models/chat_message.dart';
+import 'nearby_clinics_button.dart';
 
 class ChatMessageWidget extends StatelessWidget {
   final ChatMessage message;
@@ -187,6 +188,10 @@ class ChatMessageWidget extends StatelessWidget {
                       ],
                     ],
                   ),
+                  if (!isUser && message.showClinicsButton) ...[
+                    const SizedBox(height: 12),
+                    const NearbyClinicsButton(),
+                  ],
                 ],
               ),
             ),

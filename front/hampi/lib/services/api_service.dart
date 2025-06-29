@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 import '../models/agent.dart';
+import '../models/clinic.dart';
 
 class ApiService {
   static String get baseUrl => AppConfig.serverUrl;
@@ -110,6 +111,30 @@ class ApiService {
       return response.statusCode == 200;
     } catch (e) {
       return false;
+    }
+  }
+
+  static Future<List<Clinic>> getNearbyClinics({
+    required double lat,
+    required double lon,
+    double radio = 3000,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/google/clinicas_cercanas?lat=$lat&lon=$lon&radio=$radio'),
+        headers: {
+          'accept': 'application/json; charset=utf-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = json.decode(utf8.decode(response.bodyBytes));
+        return jsonList.map((json) => Clinic.fromJson(json)).toList();
+      } else {
+        throw Exception('Error en la petición: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error de conexión: $e');
     }
   }
 } 

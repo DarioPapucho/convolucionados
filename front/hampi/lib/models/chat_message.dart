@@ -25,6 +25,7 @@ class ChatMessage {
   final String? description;
   final String? diagnosis;
   final MessageCategory category;
+  final bool showClinicsButton;
 
   ChatMessage({
     required this.id,
@@ -37,6 +38,7 @@ class ChatMessage {
     this.description,
     this.diagnosis,
     this.category = MessageCategory.initial,
+    this.showClinicsButton = false,
   });
 
   ChatMessage copyWith({
@@ -50,6 +52,7 @@ class ChatMessage {
     String? description,
     String? diagnosis,
     MessageCategory? category,
+    bool? showClinicsButton,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -62,6 +65,7 @@ class ChatMessage {
       description: description ?? this.description,
       diagnosis: diagnosis ?? this.diagnosis,
       category: category ?? this.category,
+      showClinicsButton: showClinicsButton ?? this.showClinicsButton,
     );
   }
 
@@ -77,6 +81,7 @@ class ChatMessage {
       'description': description,
       'diagnosis': diagnosis,
       'category': category.name,
+      'showClinicsButton': showClinicsButton,
     };
   }
 
@@ -92,6 +97,7 @@ class ChatMessage {
       description: json['description'],
       diagnosis: json['diagnosis'],
       category: MessageCategory.values.firstWhere((e) => e.name == json['category']),
+      showClinicsButton: json['showClinicsButton'] ?? false,
     );
   }
 } 

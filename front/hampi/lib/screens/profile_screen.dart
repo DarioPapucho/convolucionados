@@ -53,14 +53,6 @@ class ProfileScreen extends StatelessWidget {
           _buildProfileItem(Icons.email, 'Email', 'usuario@ejemplo.com'),
           _buildProfileItem(Icons.phone, 'Teléfono', '+1234567890'),
           _buildProfileItem(Icons.location_on, 'Ubicación', 'Ciudad, País'),
-          const SizedBox(height: 32),
-          const Text(
-            'Estadísticas',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           const SizedBox(height: 16),
           _buildStatItem('Evaluaciones realizadas', '0'),
           _buildStatItem('Última evaluación', 'Nunca'),
