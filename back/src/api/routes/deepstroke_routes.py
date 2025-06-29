@@ -17,16 +17,16 @@ def get_dialog_service() -> GeminiService:
 
 @router.post("/predict", response_model=DeepStrokeResponseDTO)
 async def predict_stroke_risk(
-    id_paciente: str = Form(...),
-    genero: int = Form(...),
-    fumador_alguna_ocasion_basal: int = Form(...),
-    hipertension_basal: int = Form(...),
-    diabetes_mellitus_tipo_2_basal: int = Form(...),
-    edad_basal: int = Form(...),
-    pas_basal: int = Form(...),
-    hdl_c_basal: float = Form(...),
-    colesterol_total_basal: float = Form(...),
-    imc_basal: float = Form(...),
+    id_paciente: str = Form(..., description="ID único del paciente"),
+    genero: bool = Form(..., description="Género del paciente (True=Masculino, False=Femenino)"),
+    fumador_alguna_ocasion_basal: bool = Form(..., description="¿Ha fumado alguna vez? (True=Sí, False=No)"),
+    hipertension_basal: bool = Form(..., description="¿Tiene hipertensión? (True=Sí, False=No)"),
+    diabetes_mellitus_tipo_2_basal: bool = Form(..., description="¿Tiene diabetes tipo 2? (True=Sí, False=No)"),
+    edad_basal: int = Form(..., description="Edad del paciente (años)", ge=18, le=120),
+    pas_basal: float = Form(..., description="Presión arterial sistólica (mmHg)", ge=80, le=250),
+    hdl_c_basal: float = Form(..., description="HDL colesterol (mmol/L)", ge=0.1, le=10.0),
+    colesterol_total_basal: float = Form(..., description="Colesterol total (mmol/L)", ge=1.0, le=20.0),
+    imc_basal: float = Form(..., description="Índice de masa corporal (kg/m²)", ge=15.0, le=50.0),
     ojo1: UploadFile = File(..., description="Imagen de fondo de ojo derecho"),
     ojo2: UploadFile = File(..., description="Imagen de fondo de ojo izquierdo"),
     deepstroke_service: DeepStrokeService = Depends(get_deepstroke_service),
@@ -35,18 +35,24 @@ async def predict_stroke_risk(
     """
     Predice el riesgo de accidente cerebrovascular usando análisis de fondo de ojo con RETFound
     
+    **Parámetros:**
     - **id_paciente**: ID único del paciente
-    - **genero**: Género (0=femenino, 1=masculino)
-    - **fumador_alguna_ocasion_basal**: Historial de tabaquismo (0=no, 1=sí)
-    - **hipertension_basal**: Hipertensión (0=no, 1=sí)
-    - **diabetes_mellitus_tipo_2_basal**: Diabetes tipo 2 (0=no, 1=sí)
-    - **edad_basal**: Edad del paciente
-    - **pas_basal**: Presión arterial sistólica
-    - **hdl_c_basal**: HDL colesterol
-    - **colesterol_total_basal**: Colesterol total
-    - **imc_basal**: Índice de masa corporal
+    - **genero**: Género (True=Masculino, False=Femenino)
+    - **fumador_alguna_ocasion_basal**: ¿Ha fumado alguna vez? (True=Sí, False=No)
+    - **hipertension_basal**: ¿Tiene hipertensión? (True=Sí, False=No)
+    - **diabetes_mellitus_tipo_2_basal**: ¿Tiene diabetes tipo 2? (True=Sí, False=No)
+    - **edad_basal**: Edad del paciente (18-120 años)
+    - **pas_basal**: Presión arterial sistólica (80-250 mmHg)
+    - **hdl_c_basal**: HDL colesterol (0.1-10.0 mmol/L)
+    - **colesterol_total_basal**: Colesterol total (1.0-20.0 mmol/L)
+    - **imc_basal**: Índice de masa corporal (15.0-50.0 kg/m²)
     - **ojo1**: Imagen del fondo de ojo derecho
     - **ojo2**: Imagen del fondo de ojo izquierdo
+    
+    **Retorna:**
+    - Probabilidad de ACV
+    - Nivel de riesgo (BAJO, MODERADO, ALTO, MUY ALTO)
+    - Recomendaciones médicas personalizadas
     """
     try:
         # Validar tipos de archivo
@@ -55,22 +61,27 @@ async def predict_stroke_risk(
         if not ojo2.content_type.startswith('image/'):
             raise HTTPException(status_code=400, detail="ojo2 debe ser una imagen")
         
-        # Crear diccionario con los datos clínicos
-        data = {
-            'id_paciente': id_paciente,
-            'genero': genero,
-            'fumador_alguna_ocasion_basal': fumador_alguna_ocasion_basal,
-            'hipertension_basal': hipertension_basal,
-            'diabetes_mellitus_tipo_2_basal': diabetes_mellitus_tipo_2_basal,
-            'edad_basal': edad_basal,
-            'pas_basal': pas_basal,
-            'hdl_c_basal': hdl_c_basal,
-            'colesterol_total_basal': colesterol_total_basal,
-            'imc_basal': imc_basal
-        }
+        # Crear DTO con datos de la API (booleanos)
+        request_dto = DeepStrokeRequestDTO(
+            id_paciente=id_paciente,
+            genero=genero,
+            fumador_alguna_ocasion_basal=fumador_alguna_ocasion_basal,
+            hipertension_basal=hipertension_basal,
+            diabetes_mellitus_tipo_2_basal=diabetes_mellitus_tipo_2_basal,
+            edad_basal=edad_basal,
+            pas_basal=pas_basal,
+            hdl_c_basal=hdl_c_basal,
+            colesterol_total_basal=colesterol_total_basal,
+            imc_basal=imc_basal,
+            ojo1=ojo1,
+            ojo2=ojo2
+        )
+        
+        # Convertir a formato del backend (0/1)
+        backend_data = request_dto.to_backend_format()
         
         # Realizar predicción
-        result = await deepstroke_service.predict(data, ojo1, ojo2)
+        result = await deepstroke_service.predict(backend_data, ojo1, ojo2)
         
         # Generar recomendaciones médicas con prompt específico
         system_prompt = """Eres el Dr. Carlos, un neurólogo especialista en prevención de accidentes cerebrovasculares (ACV) con 15 años de experiencia. 
@@ -97,9 +108,9 @@ async def predict_stroke_risk(
         - Hipertensión: {'Sí' if result['hipertension_basal'] == 1 else 'No'}
         - Diabetes: {'Sí' if result['diabetes_mellitus_tipo_2_basal'] == 1 else 'No'}
         - Presión arterial: {result['pas_basal']} mmHg
-        - HDL colesterol: {result['hdl_c_basal']}
-        - Colesterol total: {result['colesterol_total_basal']}
-        - IMC: {result['imc_basal']}
+        - HDL colesterol: {result['hdl_c_basal']} mmol/L
+        - Colesterol total: {result['colesterol_total_basal']} mmol/L
+        - IMC: {result['imc_basal']} kg/m²
         
         Resultado del análisis:
         - Nivel de riesgo: {result['nivel_riesgo']}
@@ -117,7 +128,8 @@ async def predict_stroke_risk(
         # Actualizar el resultado con las recomendaciones médicas
         result['recomendaciones_medicas'] = medical_advice
         
-        return DeepStrokeResponseDTO(**result)
+        # Convertir respuesta del backend a formato de API (booleanos)
+        return DeepStrokeResponseDTO.from_backend_data(result)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la predicción: {str(e)}")
