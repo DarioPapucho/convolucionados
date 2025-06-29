@@ -16,4 +16,7 @@ scikit-learn
 torch
 torchvision
 transformers
-uvicorn[standard]
+pillow
+librosa
+dependency-injectorlibrosa
+pickle
