@@ -40,22 +40,24 @@ async def evaluate_dental_condition(
         # Step 1: Classify the dental condition
         classification = await vision_service.classify_image(image, description)
         
-        system_prompt = """Eres un dentista experto. Según la clasificación de una condición dental u oral, 
-        brinda consejos médicos profesionales, claros y útiles. Incluye recomendaciones sobre:
-        - Si es necesario consultar con un especialista
-        - Posibles tratamientos (como conducto, extracción, restauración)
-        - Síntomas o señales de alerta que requieren atención urgente
-        - Consejos de prevención y cuidado de la higiene bucal
+        system_prompt = """Eres un dentista experto. Basado en una clasificación preliminar de una posible condición dental u oral, 
+        brinda consejos profesionales, claros y útiles. Tu objetivo es orientar al paciente, pero siempre dejando en claro que este análisis es solo una guía inicial y no reemplaza una consulta médica.
 
-        Habla con un tono amigable y sencillo, para que cualquier persona pueda entenderlo fácilmente. Limita tu respuesta a solo dos párrafos.
+        Incluye en tu respuesta:
+        - Una recomendación clara de acudir al dentista u odontólogo, explicando por qué es importante una revisión presencial
+        - Posibles tratamientos que un profesional podría sugerir (como conducto, extracción, restauración), sin recetar medicamentos ni sugerir automedicación
+        - Síntomas comunes relacionados con la condición que podrían empeorar si no se atienden
+        - Consejos de prevención e higiene bucal para mantener una buena salud dental
+
+        Usa un tono amigable y sencillo, para que cualquier persona pueda entenderlo fácilmente. Limita tu respuesta a solo dos párrafos. Aclara que esta información es solo orientativa y no reemplaza el diagnóstico profesional.
         """
 
         user_prompt = f"""
-        Clasificación de la condición dental: {classification}
+        Clasificación preliminar de la condición dental: {classification}
 
         Descripción adicional del paciente: {description or 'No proporcionada'}
 
-        Por favor, brinda una recomendación dental basada en esta información.
+        Por favor, brinda una orientación dental basada en esta información, recordando que no es un diagnóstico médico definitivo.
         """
         
         medical_advice = await dialog_service.generate_response(
